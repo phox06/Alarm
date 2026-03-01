@@ -22,7 +22,6 @@ class AlarmReceiver : BroadcastReceiver() {
             putExtra("SOUND_URI", soundUri)
         }
 
-        // 2. Vibrate
         val vibrator = if (Build.VERSION.SDK_INT >= 31) {
             val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
             vibratorManager.defaultVibrator
@@ -30,11 +29,9 @@ class AlarmReceiver : BroadcastReceiver() {
             @Suppress("DEPRECATION")
             context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
-        // Vibrate pattern: Wait 0ms, vibrate 1000ms, sleep 1000ms
         vibrator.vibrate(longArrayOf(0, 1000, 1000), 0)
 
-        // 3. Show Notification
-        // In a real app, you would use a FullScreenIntent here to show an Activity to dismiss the alarm
+
         val builder = NotificationCompat.Builder(context, "ALARM_CHANNEL_ID")
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle("Wake Up!")
@@ -45,10 +42,8 @@ class AlarmReceiver : BroadcastReceiver() {
         try {
             NotificationManagerCompat.from(context).notify(123, builder.build())
         } catch (e: SecurityException) {
-            // Handle missing notification permission
         }
 
-        // Note: You need a way to stop the MediaPlayer and Vibrator.
-        // Typically, tapping the notification opens an Activity where you call .stop()
+
     }
 }

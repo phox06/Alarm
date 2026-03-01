@@ -7,20 +7,17 @@ object AlarmUtils {
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
         val currentMinute = calendar.get(Calendar.MINUTE)
 
-        // Set the target time on the calendar
         calendar.set(Calendar.HOUR_OF_DAY, alarm.hour)
         calendar.set(Calendar.MINUTE, alarm.minute)
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
 
-        // Check if the alarm is for today and the time hasn't passed yet
         if (alarm.daysOfWeek[currentDayIndex] &&
             (alarm.hour > currentHour || (alarm.hour == currentHour && alarm.minute > currentMinute))) {
             return calendar.timeInMillis
         }
 
-        // If not today, find the next active day
-        // We start checking from tomorrow (1 day later) up to 7 days later
+
         for (i in 1..7) {
             val nextDayIndex = (currentDayIndex + i) % 7
             if (alarm.daysOfWeek[nextDayIndex]) {
@@ -29,6 +26,6 @@ object AlarmUtils {
             }
         }
 
-        return -1L // No days selected
+        return -1L
     }
 }

@@ -1,4 +1,5 @@
 package com.example.alarm
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -19,6 +20,7 @@ class StopwatchFragment : Fragment(R.layout.fragment_stopwatch) {
     private lateinit var tvLaps: TextView
 
     private val runnable = object : Runnable {
+        @SuppressLint("DefaultLocale")
         override fun run() {
             updateTime = SystemClock.uptimeMillis() - startTime
             val updatedTime = timeBuff + updateTime
@@ -26,7 +28,7 @@ class StopwatchFragment : Fragment(R.layout.fragment_stopwatch) {
             val mins = secs / 60
             val milliseconds = (updatedTime % 1000).toInt()
 
-            if (isVisible) { // Only update UI if user is looking at it
+            if (isVisible) {
                 tvTimer.text = String.format("%02d:%02d:%03d", mins, secs % 60, milliseconds)
             }
             handler.postDelayed(this, 0)

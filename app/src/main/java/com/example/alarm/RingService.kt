@@ -23,16 +23,14 @@ class RingService : Service() {
         val action = intent?.action
 
         if (action == "ACTION_STOP") {
-            // User clicked the "Stop" button
             stopAlarm()
             return START_NOT_STICKY
         }
 
-        // 1. Get the sound URI passed from the Receiver
+
         val soundString = intent?.getStringExtra("SOUND_URI")
         val soundUri = if (soundString != null) Uri.parse(soundString) else android.provider.Settings.System.DEFAULT_ALARM_ALERT_URI
 
-        // 2. Start Music
         try {
             mediaPlayer = MediaPlayer.create(this, soundUri)
             mediaPlayer?.isLooping = true
@@ -41,7 +39,6 @@ class RingService : Service() {
             e.printStackTrace()
         }
 
-        // 3. Start Vibration
         if (Build.VERSION.SDK_INT >= 31) {
             val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
             vibrator = vibratorManager.defaultVibrator
@@ -52,7 +49,6 @@ class RingService : Service() {
         val pattern = longArrayOf(0, 1000, 1000)
         vibrator?.vibrate(android.os.VibrationEffect.createWaveform(pattern, 0))
 
-        // 4. Show Notification with STOP Button
         val stopIntent = Intent(this, RingService::class.java).apply {
             this.action = "ACTION_STOP"
         }
@@ -66,8 +62,7 @@ class RingService : Service() {
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setOngoing(true) // Prevents user from swiping it away
-            // Add the action button
+            .setOngoing(true)
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, "STOP ALARM", stopPendingIntent)
             .build()
 
