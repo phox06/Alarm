@@ -62,5 +62,15 @@ class StopwatchFragment : Fragment(R.layout.fragment_stopwatch) {
                 tvLaps.append("\n${tvTimer.text}")
             }
         }
+
+        view.findViewById<Button>(R.id.btnReset).setOnClickListener {
+            handler.removeCallbacks(runnable)
+            isRunning = false
+            startTime = 0L
+            timeBuff = 0L
+            updateTime = 0L
+            tvTimer.text = "00:00:000"
+            tvLaps.text = "Lap Times:\n"
+        }
     }
 }
