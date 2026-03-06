@@ -34,7 +34,9 @@ class MainActivity : AppCompatActivity() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             when (position) {
                 0 -> tab.text = "Alarm"
-                1 -> tab.text = "Stopwatch"
+                1 -> tab.text = "World Clock"
+                2 -> tab.text = "Stopwatch"
+                3 -> tab.text = "Countdown"
             }
         }.attach()
 

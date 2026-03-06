@@ -1,155 +1,134 @@
 package com.example.alarm
+
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.media.RingtoneManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
-import android.widget.Button
-import android.widget.TimePicker
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
-import java.util.*
-import android.provider.Settings
 import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.util.*
 
 class AlarmFragment : Fragment(R.layout.fragment_alarm) {
 
-    private var selectedSoundUri: Uri? = null
-
-
-    private val dayMapping = arrayOf(
-        Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY,
-        Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY
-    )
-
-    private val pickSoundLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == AppCompatActivity.RESULT_OK) {
-                selectedSoundUri =
-                    result.data?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
-                Toast.makeText(requireContext(), "Sound Selected!", Toast.LENGTH_SHORT).show()
-            }
-        }
+    private lateinit var alarmAdapter: AlarmAdapter
+    private val alarms = mutableListOf<AlarmItem>()
+    private lateinit var sharedPreferences: SharedPreferences
+    private val gson = Gson()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val timePicker = view.findViewById<TimePicker>(R.id.timePicker)
-        val chipGroup = view.findViewById<ChipGroup>(R.id.chipGroupDays)
-        val btnSet = view.findViewById<Button>(R.id.btnSetAlarm)
-        val btnSound = view.findViewById<Button>(R.id.btnPickSound)
+        sharedPreferences = requireContext().getSharedPreferences("Alarms", Context.MODE_PRIVATE)
+        loadAlarms()
 
-        btnSound.setOnClickListener {
-            val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER)
-            pickSoundLauncher.launch(intent)
-        }
-
-        btnSet.setOnClickListener {
-            // 1. Get Selected Days
-            val selectedDays = mutableListOf<Int>()
-            for (i in 0 until chipGroup.childCount) {
-                val chip = chipGroup.getChildAt(i) as Chip
-                if (chip.isChecked) {
-                    selectedDays.add(dayMapping[i])
-                }
+        val rvAlarms = view.findViewById<RecyclerView>(R.id.rvAlarms)
+        alarmAdapter = AlarmAdapter(alarms, { alarm, isEnabled ->
+            alarm.isEnabled = isEnabled
+            if (isEnabled) {
+                scheduleAlarm(alarm)
+            } else {
+                cancelAlarm(alarm)
             }
-            val alarmManager =
-                requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            saveAlarms()
+        }, { alarm ->
+            cancelAlarm(alarm)
+            alarms.remove(alarm)
+            alarmAdapter.notifyDataSetChanged()
+            saveAlarms()
+        })
+
+        rvAlarms.layoutManager = LinearLayoutManager(requireContext())
+        rvAlarms.adapter = alarmAdapter
+
+        view.findViewById<FloatingActionButton>(R.id.fabAddAlarm).setOnClickListener {
+            showTimePickerDialog()
+        }
+    }
+
+    private fun showTimePickerDialog() {
+        val calendar = Calendar.getInstance()
+        TimePickerDialog(requireContext(), { _, hourOfDay, minute ->
+            val newAlarm = AlarmItem(
+                id = System.currentTimeMillis().toInt(),
+                hour = hourOfDay,
+                minute = minute,
+                daysOfWeek = BooleanArray(7) { true },
+                soundUriString = null,
+                isEnabled = true
+            )
+            alarms.add(newAlarm)
+            alarmAdapter.notifyDataSetChanged()
+            saveAlarms()
+            scheduleAlarm(newAlarm)
+        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
+    }
+
+    private fun scheduleAlarm(alarm: AlarmItem) {
+        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             if (!alarmManager.canScheduleExactAlarms()) {
-                // Permission is denied. Redirect user to settings.
-                Toast.makeText(
-                    requireContext(),
-                    "Please grant Exact Alarm permission to use this feature.",
-                    Toast.LENGTH_LONG
-                ).show()
                 val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
                     data = "package:${requireContext().packageName}".toUri()
                 }
                 startActivity(intent)
-                return@setOnClickListener // Stop executing here until they grant it
-            }
-            if (selectedDays.isEmpty()) {
-                scheduleSingleAlarm(timePicker.hour, timePicker.minute)
-            } else {
-                scheduleRepeatingAlarm(timePicker.hour, timePicker.minute, selectedDays)
-            }
-        }
-    }
-
-    private fun scheduleSingleAlarm(hour: Int, minute: Int) {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
-            set(Calendar.SECOND, 0)
-        }
-
-        if (calendar.timeInMillis <= System.currentTimeMillis()) {
-            calendar.add(Calendar.DAY_OF_YEAR, 1)
-        }
-
-        setSystemAlarm(calendar.timeInMillis)
-        Toast.makeText(requireContext(), "Alarm set for once!", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun scheduleRepeatingAlarm(hour: Int, minute: Int, activeDays: List<Int>) {
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.HOUR_OF_DAY, hour)
-        calendar.set(Calendar.MINUTE, minute)
-        calendar.set(Calendar.SECOND, 0)
-
-
-        val currentDay = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
-        val now = System.currentTimeMillis()
-
-        if (activeDays.contains(currentDay) && calendar.timeInMillis > now) {
-           //
-        } else {
-            var daysToAdd = 1
-            while (daysToAdd <= 7) {
-                calendar.add(Calendar.DAY_OF_YEAR, 1) // Move to next day
-                val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-
-                if (activeDays.contains(dayOfWeek)) {
-                    break
-                }
-                daysToAdd++
+                return
             }
         }
 
-        setSystemAlarm(calendar.timeInMillis)
-        Toast.makeText(requireContext(), "Alarm set for next occurrence!", Toast.LENGTH_SHORT)
-            .show()
-    }
-
-    private fun setSystemAlarm(triggerTime: Long) {
-        val context = requireContext()
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        val intent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("SOUND_URI", selectedSoundUri?.toString())
-        }
-
-        val pendingIntent = PendingIntent.getBroadcast(
-            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        try {
+        val triggerTime = AlarmUtils.getNextAlarmTimeMillis(alarm)
+        if (triggerTime != -1L) {
+            val intent = Intent(requireContext(), AlarmReceiver::class.java).apply {
+                putExtra("SOUND_URI", alarm.soundUriString)
+            }
+            val pendingIntent = PendingIntent.getBroadcast(
+                requireContext(), alarm.id, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
             alarmManager.setAlarmClock(
                 AlarmManager.AlarmClockInfo(triggerTime, pendingIntent),
                 pendingIntent
             )
-        } catch (e: SecurityException) {
-            Toast.makeText(context, "Failed to set alarm: Permission denied", Toast.LENGTH_SHORT)
-                .show()
-            e.printStackTrace()
+        }
+    }
+
+    private fun cancelAlarm(alarm: AlarmItem) {
+        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(requireContext(), AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            requireContext(), alarm.id, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntent)
+    }
+
+    private fun saveAlarms() {
+        val json = gson.toJson(alarms)
+        sharedPreferences.edit().putString("alarm_list", json).apply()
+    }
+
+    private fun loadAlarms() {
+        val json = sharedPreferences.getString("alarm_list", null)
+        if (json != null) {
+            val type = object : TypeToken<MutableList<AlarmItem>>() {}.type
+            val loadedAlarms: MutableList<AlarmItem> = gson.fromJson(json, type)
+            alarms.clear()
+            alarms.addAll(loadedAlarms)
         }
     }
 }
-//aloalo
