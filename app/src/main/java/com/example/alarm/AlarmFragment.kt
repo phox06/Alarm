@@ -6,19 +6,21 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.NumberPicker
+import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.slider.Slider
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.util.*
@@ -58,6 +60,85 @@ class AlarmFragment : Fragment(R.layout.fragment_alarm) {
         view.findViewById<FloatingActionButton>(R.id.fabAddAlarm).setOnClickListener {
             showTimePickerDialog()
         }
+
+        view.findViewById<MaterialButton>(R.id.btnOpenSleepCalc).setOnClickListener {
+            showSleepCalculator()
+        }
+    }
+
+    private fun showSleepCalculator() {
+        val dialog = BottomSheetDialog(requireContext())
+        val view = LayoutInflater.from(requireContext()).inflate(R.layout.layout_sleep_calculator, null)
+        
+        val npSleepHour = view.findViewById<NumberPicker>(R.id.npSleepHour)
+        val npSleepMinute = view.findViewById<NumberPicker>(R.id.npSleepMinute)
+        val sliderCycles = view.findViewById<Slider>(R.id.sliderCycles)
+        val tvWakeUpTime = view.findViewById<TextView>(R.id.tvWakeUpTime)
+        val btnSaveAsAlarm = view.findViewById<MaterialButton>(R.id.btnSaveAsAlarm)
+
+        // Setup NumberPickers
+        val calendar = Calendar.getInstance()
+        npSleepHour.minValue = 0
+        npSleepHour.maxValue = 23
+        npSleepHour.value = calendar.get(Calendar.HOUR_OF_DAY)
+        npSleepHour.wrapSelectorWheel = true
+        
+        npSleepMinute.minValue = 0
+        npSleepMinute.maxValue = 59
+        npSleepMinute.value = calendar.get(Calendar.MINUTE)
+        npSleepMinute.wrapSelectorWheel = true
+
+        val formatter = NumberPicker.Formatter { String.format("%02d", it) }
+        npSleepHour.setFormatter(formatter)
+        npSleepMinute.setFormatter(formatter)
+
+        fun updateResult() {
+            val calcCalendar = Calendar.getInstance()
+            calcCalendar.set(Calendar.HOUR_OF_DAY, npSleepHour.value)
+            calcCalendar.set(Calendar.MINUTE, npSleepMinute.value)
+            
+            val cycles = sliderCycles.value.toInt()
+            // Công thức: Giờ thức dậy = Giờ đi ngủ + (90 phút * Số chu kỳ) + 10 phút
+            val totalMinutesToAdd = (cycles * 90) + 10
+            calcCalendar.add(Calendar.MINUTE, totalMinutesToAdd)
+            
+            val h = calcCalendar.get(Calendar.HOUR_OF_DAY)
+            val m = calcCalendar.get(Calendar.MINUTE)
+            tvWakeUpTime.text = String.format(Locale.getDefault(), "%02d:%02d", h, m)
+        }
+
+        val pickerListener = NumberPicker.OnValueChangeListener { _, _, _ -> updateResult() }
+        npSleepHour.setOnValueChangedListener(pickerListener)
+        npSleepMinute.setOnValueChangedListener(pickerListener)
+
+        sliderCycles.addOnChangeListener { _, _, _ ->
+            updateResult()
+        }
+
+        btnSaveAsAlarm.setOnClickListener {
+            val timeParts = tvWakeUpTime.text.split(":")
+            val h = timeParts[0].toInt()
+            val m = timeParts[1].toInt()
+            
+            val newAlarm = AlarmItem(
+                id = System.currentTimeMillis().toInt(),
+                hour = h,
+                minute = m,
+                daysOfWeek = BooleanArray(7) { true },
+                soundUriString = null,
+                isEnabled = true
+            )
+            alarms.add(newAlarm)
+            alarmAdapter.notifyDataSetChanged()
+            saveAlarms()
+            scheduleAlarm(newAlarm)
+            dialog.dismiss()
+            Toast.makeText(requireContext(), "Đã thêm báo thức lúc ${tvWakeUpTime.text}", Toast.LENGTH_SHORT).show()
+        }
+
+        updateResult()
+        dialog.setContentView(view)
+        dialog.show()
     }
 
     private fun showTimePickerDialog() {

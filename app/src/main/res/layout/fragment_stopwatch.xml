@@ -1,37 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center_horizontal">
+    android:background="?android:attr/windowBackground"
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/tvTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="00:00:000"
-        android:textSize="60sp"
-        android:layout_marginTop="50dp"
-        android:textStyle="bold"/>
+        android:layout_marginTop="64dp"
+        android:text="00:00:00"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="64sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
+        android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
         android:gravity="center"
-        android:layout_marginVertical="30dp">
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/tvTimer">
 
-        <Button android:id="@+id/btnStart" android:text="Start" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="5dp"/>
-        <Button android:id="@+id/btnLap" android:text="Lap" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="5dp"/>
-        <Button android:id="@+id/btnStop" android:text="Stop" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="5dp"/>
-        <Button android:id="@+id/btnReset" android:text="Reset" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReset"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="64dp"
+            android:layout_marginEnd="16dp"
+            android:text="Reset"
+            app:cornerRadius="32dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStart"
+            android:layout_width="120dp"
+            android:layout_height="64dp"
+            android:text="Bắt đầu"
+            app:cornerRadius="32dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStop"
+            android:layout_width="120dp"
+            android:layout_height="64dp"
+            android:text="Dừng"
+            android:visibility="gone"
+            app:cornerRadius="32dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLap"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="64dp"
+            android:layout_marginStart="16dp"
+            android:text="Vòng"
+            app:cornerRadius="32dp" />
     </LinearLayout>
 
-    <ScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvLaps"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#F0F0F0"
-        android:padding="10dp">
-        <TextView android:id="@+id/tvLaps" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Lap Times:\n"/>
-    </ScrollView>
-</LinearLayout>
+        android:layout_height="0dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layoutButtons" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

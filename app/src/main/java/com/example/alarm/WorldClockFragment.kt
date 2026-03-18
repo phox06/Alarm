@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +16,7 @@ class WorldClockFragment : Fragment() {
 
     private lateinit var rvWorldClock: RecyclerView
     private lateinit var adapter: WorldClockAdapter
+    private lateinit var tvCurrentTimeZone: TextView
     private val selectedCities = mutableListOf<String>()
 
     override fun onCreateView(
@@ -24,7 +26,12 @@ class WorldClockFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_world_clock, container, false)
 
         rvWorldClock = view.findViewById(R.id.rvWorldClock)
+        tvCurrentTimeZone = view.findViewById(R.id.tvCurrentTimeZone)
         val fabAddCity: FloatingActionButton = view.findViewById(R.id.fabAddCity)
+
+        // Set current timezone info
+        val currentTz = TimeZone.getDefault()
+        tvCurrentTimeZone.text = currentTz.displayName
 
         // Default cities
         if (selectedCities.isEmpty()) {
@@ -39,8 +46,6 @@ class WorldClockFragment : Fragment() {
         rvWorldClock.adapter = adapter
 
         fabAddCity.setOnClickListener {
-            // In a real app, show a dialog to pick a city/timezone
-            // For now, let's just add a random one as a placeholder
             val allIds = TimeZone.getAvailableIDs()
             val randomId = allIds[Random().nextInt(allIds.size)]
             selectedCities.add(randomId)
@@ -55,8 +60,8 @@ class WorldClockAdapter(private val cities: List<String>) :
     RecyclerView.Adapter<WorldClockAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tvCityName: android.widget.TextView = view.findViewById(R.id.tvCityName)
-        val tvTimeZone: android.widget.TextView = view.findViewById(R.id.tvTimeZone)
+        val tvCityName: TextView = view.findViewById(R.id.tvCityName)
+        val tvTimeZone: TextView = view.findViewById(R.id.tvTimeZone)
         val tcWorldTime: android.widget.TextClock = view.findViewById(R.id.tcWorldTime)
     }
 
