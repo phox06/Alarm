@@ -2,28 +2,24 @@ package com.example.alarm
 
 import android.app.AlarmManager
 import android.app.PendingIntent
-import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.util.*
+import java.util.Calendar
 
-class AlarmFragment : Fragment(R.layout.fragment_alarm) {
+class AlarmFragment : Fragment(R.layout.fragment_alarm), EditAlarmFragment.OnAlarmEditedListener {
 
     private lateinit var alarmAdapter: AlarmAdapter
     private val alarms = mutableListOf<AlarmItem>()
@@ -50,23 +46,32 @@ class AlarmFragment : Fragment(R.layout.fragment_alarm) {
             alarms.remove(alarm)
             alarmAdapter.notifyDataSetChanged()
             saveAlarms()
+        }, { alarm ->
+            showEditAlarmFragment(alarm)
         })
 
         rvAlarms.layoutManager = LinearLayoutManager(requireContext())
         rvAlarms.adapter = alarmAdapter
 
         view.findViewById<FloatingActionButton>(R.id.fabAddAlarm).setOnClickListener {
-            showTimePickerDialog()
+            showMaterialTimePicker()
         }
     }
 
-    private fun showTimePickerDialog() {
+    private fun showMaterialTimePicker() {
         val calendar = Calendar.getInstance()
-        TimePickerDialog(requireContext(), { _, hourOfDay, minute ->
+        val picker = MaterialTimePicker.Builder()
+            .setTimeFormat(TimeFormat.CLOCK_24H)
+            .setHour(calendar.get(Calendar.HOUR_OF_DAY))
+            .setMinute(calendar.get(Calendar.MINUTE))
+            .setTitleText("Chọn giờ báo thức")
+            .build()
+
+        picker.addOnPositiveButtonClickListener {
             val newAlarm = AlarmItem(
                 id = System.currentTimeMillis().toInt(),
-                hour = hourOfDay,
-                minute = minute,
+                hour = picker.hour,
+                minute = picker.minute,
                 daysOfWeek = BooleanArray(7) { true },
                 soundUriString = null,
                 isEnabled = true
@@ -75,7 +80,38 @@ class AlarmFragment : Fragment(R.layout.fragment_alarm) {
             alarmAdapter.notifyDataSetChanged()
             saveAlarms()
             scheduleAlarm(newAlarm)
-        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
+        }
+
+        picker.show(childFragmentManager, "MATERIAL_TIME_PICKER")
+    }
+
+    private fun showEditAlarmFragment(alarm: AlarmItem) {
+        val fragment = EditAlarmFragment.newInstance(alarm)
+        fragment.listener = this
+        parentFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                android.R.anim.fade_in,
+                android.R.anim.fade_out,
+                android.R.anim.fade_in,
+                android.R.anim.fade_out
+            )
+            .add(android.R.id.content, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    override fun onAlarmEdited(alarm: AlarmItem) {
+        val index = alarms.indexOfFirst { it.id == alarm.id }
+        if (index != -1) {
+            alarms[index] = alarm
+            alarmAdapter.notifyDataSetChanged()
+            saveAlarms()
+            if (alarm.isEnabled) {
+                scheduleAlarm(alarm)
+            } else {
+                cancelAlarm(alarm)
+            }
+        }
     }
 
     private fun scheduleAlarm(alarm: AlarmItem) {

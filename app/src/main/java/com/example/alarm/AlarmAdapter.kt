@@ -12,7 +12,8 @@ import java.util.Locale
 class AlarmAdapter(
     private val alarms: List<AlarmItem>,
     private val onToggle: (AlarmItem, Boolean) -> Unit,
-    private val onDelete: (AlarmItem) -> Unit
+    private val onDelete: (AlarmItem) -> Unit,
+    private val onClick: (AlarmItem) -> Unit
 ) : RecyclerView.Adapter<AlarmAdapter.AlarmViewHolder>() {
 
     class AlarmViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -43,6 +44,10 @@ class AlarmAdapter(
 
         holder.btnDeleteAlarm.setOnClickListener {
             onDelete(alarm)
+        }
+
+        holder.itemView.setOnClickListener {
+            onClick(alarm)
         }
 
         // Simple representation of days

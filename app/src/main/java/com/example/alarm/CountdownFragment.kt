@@ -1,12 +1,9 @@
 package com.example.alarm
 
-import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
 import android.media.AudioAttributes
-import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -23,7 +20,6 @@ import android.widget.LinearLayout
 import android.widget.NumberPicker
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -49,7 +45,6 @@ class CountdownFragment : Fragment() {
     private lateinit var btnStart: MaterialButton
     private lateinit var btnDelete: MaterialButton
     private lateinit var btnPauseResume: MaterialButton
-    private lateinit var btnSelectSound: MaterialButton
     private lateinit var layoutRunningButtons: LinearLayout
 
     private lateinit var cardPreset1: MaterialCardView
@@ -60,19 +55,6 @@ class CountdownFragment : Fragment() {
     private var totalTimeInMillis: Long = 0
     private var timeLeftInMillis: Long = 0
     private var isTimerRunning = false
-    private var selectedSoundUri: Uri? = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-
-    private val soundPickerLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val uri: Uri? =
-                    result.data?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
-                if (uri != null) {
-                    selectedSoundUri = uri
-                    Toast.makeText(requireContext(), "Đã chọn âm thanh", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
 
     companion object {
         private const val CHANNEL_ID = "COUNTDOWN_CHANNEL"
@@ -101,7 +83,6 @@ class CountdownFragment : Fragment() {
         btnStart = view.findViewById(R.id.btnStartCountdown)
         btnDelete = view.findViewById(R.id.btnDeleteCountdown)
         btnPauseResume = view.findViewById(R.id.btnPauseResumeCountdown)
-        btnSelectSound = view.findViewById(R.id.btnSelectSound)
         layoutRunningButtons = view.findViewById(R.id.layoutRunningButtons)
 
         cardPreset1 = view.findViewById(R.id.cardPreset1)
@@ -122,8 +103,6 @@ class CountdownFragment : Fragment() {
             }
         }
 
-        btnSelectSound.setOnClickListener { pickSound() }
-
         cardPreset1.setOnClickListener { setPresetTime(10) }
         cardPreset2.setOnClickListener { setPresetTime(15) }
         cardPreset3.setOnClickListener { setPresetTime(30) }
@@ -131,15 +110,8 @@ class CountdownFragment : Fragment() {
         return view
     }
 
-    private fun pickSound() {
-        val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
-            putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
-            putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Chọn âm thanh báo thức")
-            putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, selectedSoundUri)
-            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
-            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
-        }
-        soundPickerLauncher.launch(intent)
+    private fun getSelectedSoundUri(): Uri? {
+        return (activity as? MainActivity)?.getSelectedSoundUri()
     }
 
     private fun createNotificationChannel() {
@@ -155,7 +127,7 @@ class CountdownFragment : Fragment() {
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .build()
-                setSound(selectedSoundUri, audioAttributes)
+                setSound(getSelectedSoundUri(), audioAttributes)
             }
             val notificationManager: NotificationManager =
                 requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -174,7 +146,7 @@ class CountdownFragment : Fragment() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)
-            .setSound(selectedSoundUri)
+            .setSound(getSelectedSoundUri())
             .setVibrate(longArrayOf(0, 500, 200, 500))
 
         with(NotificationManagerCompat.from(requireContext())) {
