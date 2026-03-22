@@ -1,8 +1,11 @@
 package com.example.alarm
 import android.Manifest
 import android.content.pm.PackageManager
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +15,8 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
 class MainActivity : AppCompatActivity() {
+
+    private var selectedSoundUri: Uri? = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
 
     private val requestNotificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -28,19 +33,44 @@ class MainActivity : AppCompatActivity() {
 
         val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
         val viewPager = findViewById<ViewPager2>(R.id.viewPager)
+        val btnGlobalMenu = findViewById<ImageButton>(R.id.btnGlobalMenu)
+        
         val adapter = ViewPagerAdapter(this)
         viewPager.adapter = adapter
 
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             when (position) {
-                0 -> tab.text = "Alarm"
-                1 -> tab.text = "World Clock"
-                2 -> tab.text = "Stopwatch"
-                3 -> tab.text = "Countdown"
+                0 -> tab.text = "Báo thức"
+                1 -> tab.text = "Giờ thế giới"
+                2 -> tab.text = "Bấm giờ"
+                3 -> tab.text = "Hẹn giờ"
             }
         }.attach()
 
+        btnGlobalMenu.setOnClickListener {
+            showSettings()
+        }
+
         checkNotificationPermission()
+    }
+
+    private fun showSettings() {
+        supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                android.R.anim.fade_in,
+                android.R.anim.fade_out,
+                android.R.anim.fade_in,
+                android.R.anim.fade_out
+            )
+            .add(android.R.id.content, SettingsFragment())
+            .addToBackStack(null)
+            .commit()
+    }
+
+    fun getSelectedSoundUri(): Uri? = selectedSoundUri
+
+    fun setSelectedSoundUri(uri: Uri) {
+        selectedSoundUri = uri
     }
 
     private fun checkNotificationPermission() {
@@ -52,7 +82,6 @@ class MainActivity : AppCompatActivity() {
                 ) == PackageManager.PERMISSION_GRANTED -> {
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
-
                     requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
                 else -> {

@@ -4,19 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import java.util.Random
 import java.util.TimeZone
 
 class WorldClockFragment : Fragment() {
 
     private lateinit var rvWorldClock: RecyclerView
     private lateinit var adapter: WorldClockAdapter
-    private lateinit var tvCurrentTimeZone: TextView
     private val selectedCities = mutableListOf<String>()
 
     override fun onCreateView(
@@ -26,12 +24,7 @@ class WorldClockFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_world_clock, container, false)
 
         rvWorldClock = view.findViewById(R.id.rvWorldClock)
-        tvCurrentTimeZone = view.findViewById(R.id.tvCurrentTimeZone)
         val fabAddCity: FloatingActionButton = view.findViewById(R.id.fabAddCity)
-
-        // Set current timezone info
-        val currentTz = TimeZone.getDefault()
-        tvCurrentTimeZone.text = currentTz.displayName
 
         // Default cities
         if (selectedCities.isEmpty()) {
@@ -41,27 +34,64 @@ class WorldClockFragment : Fragment() {
             selectedCities.add("Asia/Tokyo")
         }
 
-        adapter = WorldClockAdapter(selectedCities)
+        // --- UPDATED: Pass a lambda function to handle the long click ---
+        adapter = WorldClockAdapter(selectedCities) { position ->
+            showDeleteConfirmation(position)
+        }
+
         rvWorldClock.layoutManager = LinearLayoutManager(context)
         rvWorldClock.adapter = adapter
 
+        // Listen for data coming back from the Globe Fragment
+        parentFragmentManager.setFragmentResultListener("timezoneRequest", viewLifecycleOwner) { _, bundle ->
+            val resultTzId = bundle.getString("timeZoneId")
+            if (resultTzId != null && !selectedCities.contains(resultTzId)) {
+                selectedCities.add(resultTzId)
+                adapter.notifyItemInserted(selectedCities.size - 1)
+            }
+        }
+
         fabAddCity.setOnClickListener {
-            val allIds = TimeZone.getAvailableIDs()
-            val randomId = allIds[Random().nextInt(allIds.size)]
-            selectedCities.add(randomId)
-            adapter.notifyItemInserted(selectedCities.size - 1)
+            parentFragmentManager.beginTransaction()
+                .add(android.R.id.content, GlobeSelectionFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
         return view
     }
+
+    // --- NEW: Method to show a delete confirmation popup ---
+    private fun showDeleteConfirmation(position: Int) {
+        val tzId = selectedCities[position]
+        val cityName = tzId.substringAfter('/') // Extracts just the city name
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Remove City")
+            .setMessage("Are you sure you want to remove $cityName from your world clock?")
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton("Remove") { dialog, _ ->
+                // Remove from the data list
+                selectedCities.removeAt(position)
+                // Tell the adapter the item is gone so it animates away
+                adapter.notifyItemRemoved(position)
+                dialog.dismiss()
+            }
+            .show()
+    }
 }
 
-class WorldClockAdapter(private val cities: List<String>) :
-    RecyclerView.Adapter<WorldClockAdapter.ViewHolder>() {
+// --- UPDATED ADAPTER: Added the onCityLongClick parameter ---
+class WorldClockAdapter(
+    private val cities: List<String>,
+    private val onCityLongClick: (Int) -> Unit
+) : RecyclerView.Adapter<WorldClockAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tvCityName: TextView = view.findViewById(R.id.tvCityName)
-        val tvTimeZone: TextView = view.findViewById(R.id.tvTimeZone)
+        val tvCityName: android.widget.TextView = view.findViewById(R.id.tvCityName)
+        val tvTimeZone: android.widget.TextView = view.findViewById(R.id.tvTimeZone)
         val tcWorldTime: android.widget.TextClock = view.findViewById(R.id.tcWorldTime)
     }
 
@@ -78,6 +108,13 @@ class WorldClockAdapter(private val cities: List<String>) :
         holder.tvCityName.text = tzId.substringAfter('/')
         holder.tvTimeZone.text = tz.displayName
         holder.tcWorldTime.timeZone = tzId
+
+        // --- NEW: Listen for the long press and send the position back to the fragment ---
+        holder.itemView.setOnLongClickListener {
+            // holder.adapterPosition is safer than 'position' in case the list order changes
+            onCityLongClick(holder.adapterPosition)
+            true // Returning true tells Android we completely consumed this long-click event
+        }
     }
 
     override fun getItemCount(): Int = cities.size

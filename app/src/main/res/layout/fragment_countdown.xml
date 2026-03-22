@@ -4,219 +4,199 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/windowBackground"
+    android:background="#000000"
     tools:context=".CountdownFragment">
 
-    <!-- Container cho bộ đếm và nhãn - Sẽ được căn giữa khi chạy -->
+    <!-- Setup UI Container -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layoutTimerContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:id="@+id/layoutSetup"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/guideline_buttons"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Labels for Time Units -->
         <LinearLayout
             android:id="@+id/layoutLabels"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@+id/layoutTimePicker"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintStart_toStartOf="parent">
 
             <TextView
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Giờ"
-                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textColor="#808080"
                 android:textSize="14sp" />
-
-            <!-- Space for separator -->
-            <View android:layout_width="20dp" android:layout_height="0dp" />
 
             <TextView
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Phút"
-                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textColor="#808080"
                 android:textSize="14sp" />
-
-            <!-- Space for separator -->
-            <View android:layout_width="20dp" android:layout_height="0dp" />
 
             <TextView
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Giây"
-                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textColor="#808080"
                 android:textSize="14sp" />
         </LinearLayout>
 
-        <!-- Picker Area with Separators -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/layoutDisplay"
+        <LinearLayout
+            android:id="@+id/layoutTimePicker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/layoutLabels">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.3">
 
-            <com.google.android.material.progressindicator.CircularProgressIndicator
-                android:id="@+id/progressCountdown"
-                android:layout_width="300dp"
-                android:layout_height="300dp"
-                android:visibility="invisible"
-                app:indicatorColor="?attr/colorPrimary"
-                app:indicatorSize="300dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:trackColor="?attr/colorSurfaceVariant"
-                app:trackThickness="8dp" />
+            <NumberPicker
+                android:id="@+id/npHours"
+                style="@style/NumberPickerCustom"
+                android:layout_width="80dp"
+                android:layout_height="180dp" />
 
-            <LinearLayout
-                android:id="@+id/layoutTimePicker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+            <NumberPicker
+                android:id="@+id/npMinutes"
+                style="@style/NumberPickerCustom"
+                android:layout_width="80dp"
+                android:layout_height="180dp" />
 
-                <NumberPicker
-                    android:id="@+id/npHours"
-                    android:layout_width="80dp"
-                    android:layout_height="160dp" />
-
-                <TextView
-                    android:layout_width="20dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text=":"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
-
-                <NumberPicker
-                    android:id="@+id/npMinutes"
-                    android:layout_width="80dp"
-                    android:layout_height="160dp" />
-
-                <TextView
-                    android:layout_width="20dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text=":"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
-
-                <NumberPicker
-                    android:id="@+id/npSeconds"
-                    android:layout_width="80dp"
-                    android:layout_height="160dp" />
-            </LinearLayout>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Recent Countdowns List -->
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/layoutSetupExtras"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline_buttons"
-        app:layout_constraintTop_toBottomOf="@+id/layoutTimerContainer">
+            <NumberPicker
+                android:id="@+id/npSeconds"
+                style="@style/NumberPickerCustom"
+                android:layout_width="80dp"
+                android:layout_height="180dp" />
+        </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/layoutPresets"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@+id/layoutTimePicker">
 
-            <TextView
-                android:id="@+id/tvRecentHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="Gần đây"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-            <!-- Recent Item 1 -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardRecent1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:strokeColor="?attr/colorOutlineVariant"
-                app:strokeWidth="1dp"
-                android:visibility="gone">
-                <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp">
-                    <TextView android:id="@+id/tvRecentTime1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="24sp" android:textStyle="bold" android:text="00 : 10 : 00" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent" />
-                    <ImageButton android:id="@+id/btnDeleteRecent1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/ic_menu_delete" android:background="?attr/selectableItemBackgroundBorderless" app:tint="?attr/colorError" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                android:id="@+id/cardPreset1"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="8dp"
+                app:cardBackgroundColor="#1A1A1A"
+                app:cardCornerRadius="50dp"
+                app:strokeWidth="0dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="00:10:00"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp" />
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Recent Item 2 -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardRecent2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:strokeColor="?attr/colorOutlineVariant"
-                app:strokeWidth="1dp"
-                android:visibility="gone">
-                <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp">
-                    <TextView android:id="@+id/tvRecentTime2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="24sp" android:textStyle="bold" android:text="00 : 05 : 00" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent" />
-                    <ImageButton android:id="@+id/btnDeleteRecent2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/ic_menu_delete" android:background="?attr/selectableItemBackgroundBorderless" app:tint="?attr/colorError" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                android:id="@+id/cardPreset2"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="8dp"
+                app:cardBackgroundColor="#1A1A1A"
+                app:cardCornerRadius="50dp"
+                app:strokeWidth="0dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="00:15:00"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp" />
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Recent Item 3 -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardRecent3"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:strokeColor="?attr/colorOutlineVariant"
-                app:strokeWidth="1dp"
-                android:visibility="gone">
-                <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp">
-                    <TextView android:id="@+id/tvRecentTime3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="24sp" android:textStyle="bold" android:text="00 : 01 : 00" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent" />
-                    <ImageButton android:id="@+id/btnDeleteRecent3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/ic_menu_delete" android:background="?attr/selectableItemBackgroundBorderless" app:tint="?attr/colorError" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                android:id="@+id/cardPreset3"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="8dp"
+                app:cardBackgroundColor="#1A1A1A"
+                app:cardCornerRadius="50dp"
+                app:strokeWidth="0dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="00:30:00"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp" />
             </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSelectSound"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Chọn âm thanh"
-                android:textColor="?attr/colorPrimary"
-                app:icon="@android:drawable/ic_lock_silent_mode_off"
-                app:iconTint="?attr/colorPrimary" />
-
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSelectSound"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Chọn âm thanh"
+            android:textColor="#8AB4F8"
+            android:visibility="gone"
+            app:icon="@android:drawable/ic_lock_silent_mode_off"
+            app:iconTint="#8AB4F8"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layoutPresets" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Running UI Container -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutRunning"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/guideline_buttons"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progressCountdown"
+            android:layout_width="320dp"
+            android:layout_height="320dp"
+            app:indicatorColor="#8AB4F8"
+            app:indicatorSize="320dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:trackColor="#333333"
+            app:trackThickness="8dp" />
+
+        <TextView
+            android:id="@+id/tvCountdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textColor="#8AB4F8"
+            android:textSize="72sp"
+            app:layout_constraintBottom_toBottomOf="@+id/progressCountdown"
+            app:layout_constraintEnd_toEndOf="@+id/progressCountdown"
+            app:layout_constraintStart_toStartOf="@+id/progressCountdown"
+            app:layout_constraintTop_toTopOf="@+id/progressCountdown" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_buttons"
@@ -230,10 +210,10 @@
         android:id="@+id/btnStartCountdown"
         android:layout_width="200dp"
         android:layout_height="64dp"
-        android:backgroundTint="?attr/colorPrimary"
+        android:backgroundTint="#8AB4F8"
         android:text="Bắt đầu"
         android:textAllCaps="false"
-        android:textColor="?attr/colorOnPrimary"
+        android:textColor="#000000"
         android:textSize="18sp"
         app:cornerRadius="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -260,10 +240,10 @@
             android:layout_height="64dp"
             android:layout_marginEnd="16dp"
             android:layout_weight="1"
-            android:backgroundTint="?attr/colorSurfaceVariant"
+            android:backgroundTint="#1A1A1A"
             android:text="Xóa"
             android:textAllCaps="false"
-            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textColor="#FFFFFF"
             app:cornerRadius="32dp" />
 
         <com.google.android.material.button.MaterialButton
@@ -271,10 +251,10 @@
             android:layout_width="0dp"
             android:layout_height="64dp"
             android:layout_weight="1"
-            android:backgroundTint="?attr/colorPrimary"
+            android:backgroundTint="#8AB4F8"
             android:text="Tạm dừng"
             android:textAllCaps="false"
-            android:textColor="?attr/colorOnPrimary"
+            android:textColor="#000000"
             app:cornerRadius="32dp" />
     </LinearLayout>
 

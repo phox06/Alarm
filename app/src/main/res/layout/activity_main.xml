@@ -10,6 +10,18 @@
         android:layout_height="match_parent"
         android:layout_above="@id/tabLayout" />
 
+    <ImageButton
+        android:id="@+id/btnGlobalMenu"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/menu_description"
+        android:src="@drawable/ic_more_vert"
+        app:tint="#FFFFFF" />
+
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"

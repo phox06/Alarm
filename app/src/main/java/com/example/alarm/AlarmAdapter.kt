@@ -12,7 +12,8 @@ import java.util.Locale
 class AlarmAdapter(
     private val alarms: List<AlarmItem>,
     private val onToggle: (AlarmItem, Boolean) -> Unit,
-    private val onDelete: (AlarmItem) -> Unit
+    private val onDelete: (AlarmItem) -> Unit,
+    private val onClick: (AlarmItem) -> Unit
 ) : RecyclerView.Adapter<AlarmAdapter.AlarmViewHolder>() {
 
     class AlarmViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -45,7 +46,10 @@ class AlarmAdapter(
             onDelete(alarm)
         }
 
-        // Simple representation of days
+        holder.itemView.setOnClickListener {
+            onClick(alarm)
+        }
+
         val days = arrayOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
         val activeDays = alarm.daysOfWeek.indices.filter { alarm.daysOfWeek[it] }.map { days[it] }
         holder.tvAlarmDays.text =
