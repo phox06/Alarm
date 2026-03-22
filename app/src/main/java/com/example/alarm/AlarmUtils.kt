@@ -3,7 +3,7 @@ import java.util.Calendar
 object AlarmUtils {
     fun getNextAlarmTimeMillis(alarm: AlarmItem): Long {
         val calendar = Calendar.getInstance()
-        val currentDayIndex = calendar.get(Calendar.DAY_OF_WEEK) - 1 // Calendar.SUNDAY is 1, so we map to 0-6
+        val currentDayIndex = calendar.get(Calendar.DAY_OF_WEEK) - 1
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
         val currentMinute = calendar.get(Calendar.MINUTE)
 

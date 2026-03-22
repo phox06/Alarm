@@ -166,6 +166,5 @@ class EditAlarmFragment : Fragment() {
         }
     }
     
-    // Extension for sp to px
     private val Int.sp: Float get() = this * resources.displayMetrics.scaledDensity
 }

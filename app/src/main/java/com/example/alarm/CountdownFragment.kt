@@ -136,7 +136,6 @@ class CountdownFragment : Fragment() {
     }
 
     private fun showNotification() {
-        // Re-create channel to update sound if changed
         createNotificationChannel()
 
         val builder = NotificationCompat.Builder(requireContext(), CHANNEL_ID)
@@ -186,7 +185,6 @@ class CountdownFragment : Fragment() {
         npSeconds.minValue = 0
         npSeconds.maxValue = 59
 
-        // Pad with zeros
         val formatter = NumberPicker.Formatter { String.format("%02d", it) }
         npHours.setFormatter(formatter)
         npMinutes.setFormatter(formatter)

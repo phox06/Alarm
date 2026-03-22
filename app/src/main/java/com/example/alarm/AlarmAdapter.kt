@@ -50,7 +50,6 @@ class AlarmAdapter(
             onClick(alarm)
         }
 
-        // Simple representation of days
         val days = arrayOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
         val activeDays = alarm.daysOfWeek.indices.filter { alarm.daysOfWeek[it] }.map { days[it] }
         holder.tvAlarmDays.text =
