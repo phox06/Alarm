@@ -8,16 +8,21 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import android.widget.NumberPicker
+import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.util.Calendar
+import java.util.Locale
 
 class AlarmFragment : Fragment(R.layout.fragment_alarm), EditAlarmFragment.OnAlarmEditedListener {
 
@@ -56,6 +61,77 @@ class AlarmFragment : Fragment(R.layout.fragment_alarm), EditAlarmFragment.OnAla
         view.findViewById<FloatingActionButton>(R.id.fabAddAlarm).setOnClickListener {
             showMaterialTimePicker()
         }
+
+        view.findViewById<MaterialButton>(R.id.btnOpenSleepCalc).setOnClickListener {
+            showSleepCalculator()
+        }
+    }
+
+    private fun showSleepCalculator() {
+        val dialog = BottomSheetDialog(requireContext())
+        val view = layoutInflater.inflate(R.layout.layout_sleep_calculator, null)
+        dialog.setContentView(view)
+
+        val npHour = view.findViewById<NumberPicker>(R.id.npSleepHour)
+        val npMinute = view.findViewById<NumberPicker>(R.id.npSleepMinute)
+        val tvWakeUpTime = view.findViewById<TextView>(R.id.tvWakeUpTime)
+        val btnSave = view.findViewById<MaterialButton>(R.id.btnSaveAsAlarm)
+
+        npHour.minValue = 0
+        npHour.maxValue = 23
+        npMinute.minValue = 0
+        npMinute.maxValue = 59
+
+        val calendar = Calendar.getInstance()
+        npHour.value = calendar.get(Calendar.HOUR_OF_DAY)
+        npMinute.value = calendar.get(Calendar.MINUTE)
+
+        val updateResult = {
+            val h = npHour.value
+            val m = npMinute.value
+            val cycles = 5 
+
+            val calcCalendar = Calendar.getInstance()
+            calcCalendar.set(Calendar.HOUR_OF_DAY, h)
+            calcCalendar.set(Calendar.MINUTE, m)
+            calcCalendar.add(Calendar.MINUTE, cycles * 90)
+
+            tvWakeUpTime.text = String.format(Locale.getDefault(), "%02d:%02d", 
+                calcCalendar.get(Calendar.HOUR_OF_DAY), 
+                calcCalendar.get(Calendar.MINUTE))
+        }
+
+        npHour.setOnValueChangedListener { _, _, _ -> updateResult() }
+        npMinute.setOnValueChangedListener { _, _, _ -> updateResult() }
+
+        updateResult()
+
+        btnSave.setOnClickListener {
+            val h = npHour.value
+            val m = npMinute.value
+            val cycles = 5
+
+            val calcCalendar = Calendar.getInstance()
+            calcCalendar.set(Calendar.HOUR_OF_DAY, h)
+            calcCalendar.set(Calendar.MINUTE, m)
+            calcCalendar.add(Calendar.MINUTE, cycles * 90)
+
+            val newAlarm = AlarmItem(
+                id = System.currentTimeMillis().toInt(),
+                hour = calcCalendar.get(Calendar.HOUR_OF_DAY),
+                minute = calcCalendar.get(Calendar.MINUTE),
+                daysOfWeek = BooleanArray(7) { true },
+                soundUriString = null,
+                isEnabled = true
+            )
+            alarms.add(newAlarm)
+            alarmAdapter.notifyDataSetChanged()
+            saveAlarms()
+            scheduleAlarm(newAlarm)
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun showMaterialTimePicker() {
