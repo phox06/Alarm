@@ -1,5 +1,6 @@
 package com.example.alarm
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +17,8 @@ class WorldClockFragment : Fragment() {
     private lateinit var rvWorldClock: RecyclerView
     private lateinit var adapter: WorldClockAdapter
     private val selectedCities = mutableListOf<String>()
+    private lateinit var dbHelper: DatabaseHelper
+    private var currentUsername: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -23,18 +26,16 @@ class WorldClockFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_world_clock, container, false)
 
+        dbHelper = DatabaseHelper(requireContext())
+        val userPrefs = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        currentUsername = userPrefs.getString("current_user", "") ?: ""
+
         rvWorldClock = view.findViewById(R.id.rvWorldClock)
         val fabAddCity: FloatingActionButton = view.findViewById(R.id.fabAddCity)
 
-        // Default cities
-        if (selectedCities.isEmpty()) {
-            selectedCities.add("GMT")
-            selectedCities.add("America/New_York")
-            selectedCities.add("Europe/London")
-            selectedCities.add("Asia/Tokyo")
-        }
+        // Load cities from Database for this user
+        loadCities()
 
-        // --- UPDATED: Pass a lambda function to handle the long click ---
         adapter = WorldClockAdapter(selectedCities) { position ->
             showDeleteConfirmation(position)
         }
@@ -46,6 +47,7 @@ class WorldClockFragment : Fragment() {
         parentFragmentManager.setFragmentResultListener("timezoneRequest", viewLifecycleOwner) { _, bundle ->
             val resultTzId = bundle.getString("timeZoneId")
             if (resultTzId != null && !selectedCities.contains(resultTzId)) {
+                dbHelper.addWorldClock(currentUsername, resultTzId)
                 selectedCities.add(resultTzId)
                 adapter.notifyItemInserted(selectedCities.size - 1)
             }
@@ -61,10 +63,24 @@ class WorldClockFragment : Fragment() {
         return view
     }
 
-    // --- NEW: Method to show a delete confirmation popup ---
+    private fun loadCities() {
+        selectedCities.clear()
+        val savedCities = dbHelper.getWorldClocksByUser(currentUsername)
+        if (savedCities.isEmpty()) {
+            // Default cities if new user
+            val defaults = listOf("GMT", "America/New_York", "Europe/London", "Asia/Tokyo")
+            defaults.forEach { 
+                dbHelper.addWorldClock(currentUsername, it)
+                selectedCities.add(it)
+            }
+        } else {
+            selectedCities.addAll(savedCities)
+        }
+    }
+
     private fun showDeleteConfirmation(position: Int) {
         val tzId = selectedCities[position]
-        val cityName = tzId.substringAfter('/') // Extracts just the city name
+        val cityName = tzId.substringAfter('/')
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Remove City")
@@ -73,9 +89,8 @@ class WorldClockFragment : Fragment() {
                 dialog.dismiss()
             }
             .setPositiveButton("Remove") { dialog, _ ->
-                // Remove from the data list
+                dbHelper.deleteWorldClock(currentUsername, tzId)
                 selectedCities.removeAt(position)
-                // Tell the adapter the item is gone so it animates away
                 adapter.notifyItemRemoved(position)
                 dialog.dismiss()
             }
@@ -83,7 +98,6 @@ class WorldClockFragment : Fragment() {
     }
 }
 
-// --- UPDATED ADAPTER: Added the onCityLongClick parameter ---
 class WorldClockAdapter(
     private val cities: List<String>,
     private val onCityLongClick: (Int) -> Unit
@@ -109,11 +123,9 @@ class WorldClockAdapter(
         holder.tvTimeZone.text = tz.displayName
         holder.tcWorldTime.timeZone = tzId
 
-        // --- NEW: Listen for the long press and send the position back to the fragment ---
         holder.itemView.setOnLongClickListener {
-            // holder.adapterPosition is safer than 'position' in case the list order changes
             onCityLongClick(holder.adapterPosition)
-            true // Returning true tells Android we completely consumed this long-click event
+            true
         }
     }
 

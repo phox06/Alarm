@@ -8,49 +8,47 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
-import android.widget.NumberPicker
-import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import java.util.Calendar
-import java.util.Locale
 
 class AlarmFragment : Fragment(R.layout.fragment_alarm), EditAlarmFragment.OnAlarmEditedListener {
 
     private lateinit var alarmAdapter: AlarmAdapter
     private val alarms = mutableListOf<AlarmItem>()
-    private lateinit var sharedPreferences: SharedPreferences
-    private val gson = Gson()
+    private lateinit var dbHelper: DatabaseHelper
+    private var currentUsername: String = ""
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sharedPreferences = requireContext().getSharedPreferences("Alarms", Context.MODE_PRIVATE)
+        dbHelper = DatabaseHelper(requireContext())
+        
+        // Lấy username hiện tại
+        val userPrefs = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        currentUsername = userPrefs.getString("current_user", "") ?: ""
+
         loadAlarms()
 
         val rvAlarms = view.findViewById<RecyclerView>(R.id.rvAlarms)
         alarmAdapter = AlarmAdapter(alarms, { alarm, isEnabled ->
             alarm.isEnabled = isEnabled
+            dbHelper.updateAlarm(alarm) // Cập nhật vào DB
             if (isEnabled) {
                 scheduleAlarm(alarm)
             } else {
                 cancelAlarm(alarm)
             }
-            saveAlarms()
         }, { alarm ->
             cancelAlarm(alarm)
+            dbHelper.deleteAlarm(alarm.id) // Xóa khỏi DB
             alarms.remove(alarm)
             alarmAdapter.notifyDataSetChanged()
-            saveAlarms()
         }, { alarm ->
             showEditAlarmFragment(alarm)
         })
@@ -61,77 +59,6 @@ class AlarmFragment : Fragment(R.layout.fragment_alarm), EditAlarmFragment.OnAla
         view.findViewById<FloatingActionButton>(R.id.fabAddAlarm).setOnClickListener {
             showMaterialTimePicker()
         }
-
-        view.findViewById<MaterialButton>(R.id.btnOpenSleepCalc).setOnClickListener {
-            showSleepCalculator()
-        }
-    }
-
-    private fun showSleepCalculator() {
-        val dialog = BottomSheetDialog(requireContext())
-        val view = layoutInflater.inflate(R.layout.layout_sleep_calculator, null)
-        dialog.setContentView(view)
-
-        val npHour = view.findViewById<NumberPicker>(R.id.npSleepHour)
-        val npMinute = view.findViewById<NumberPicker>(R.id.npSleepMinute)
-        val tvWakeUpTime = view.findViewById<TextView>(R.id.tvWakeUpTime)
-        val btnSave = view.findViewById<MaterialButton>(R.id.btnSaveAsAlarm)
-
-        npHour.minValue = 0
-        npHour.maxValue = 23
-        npMinute.minValue = 0
-        npMinute.maxValue = 59
-
-        val calendar = Calendar.getInstance()
-        npHour.value = calendar.get(Calendar.HOUR_OF_DAY)
-        npMinute.value = calendar.get(Calendar.MINUTE)
-
-        val updateResult = {
-            val h = npHour.value
-            val m = npMinute.value
-            val cycles = 5 
-
-            val calcCalendar = Calendar.getInstance()
-            calcCalendar.set(Calendar.HOUR_OF_DAY, h)
-            calcCalendar.set(Calendar.MINUTE, m)
-            calcCalendar.add(Calendar.MINUTE, cycles * 90)
-
-            tvWakeUpTime.text = String.format(Locale.getDefault(), "%02d:%02d", 
-                calcCalendar.get(Calendar.HOUR_OF_DAY), 
-                calcCalendar.get(Calendar.MINUTE))
-        }
-
-        npHour.setOnValueChangedListener { _, _, _ -> updateResult() }
-        npMinute.setOnValueChangedListener { _, _, _ -> updateResult() }
-
-        updateResult()
-
-        btnSave.setOnClickListener {
-            val h = npHour.value
-            val m = npMinute.value
-            val cycles = 5
-
-            val calcCalendar = Calendar.getInstance()
-            calcCalendar.set(Calendar.HOUR_OF_DAY, h)
-            calcCalendar.set(Calendar.MINUTE, m)
-            calcCalendar.add(Calendar.MINUTE, cycles * 90)
-
-            val newAlarm = AlarmItem(
-                id = System.currentTimeMillis().toInt(),
-                hour = calcCalendar.get(Calendar.HOUR_OF_DAY),
-                minute = calcCalendar.get(Calendar.MINUTE),
-                daysOfWeek = BooleanArray(7) { true },
-                soundUriString = null,
-                isEnabled = true
-            )
-            alarms.add(newAlarm)
-            alarmAdapter.notifyDataSetChanged()
-            saveAlarms()
-            scheduleAlarm(newAlarm)
-            dialog.dismiss()
-        }
-
-        dialog.show()
     }
 
     private fun showMaterialTimePicker() {
@@ -145,17 +72,21 @@ class AlarmFragment : Fragment(R.layout.fragment_alarm), EditAlarmFragment.OnAla
 
         picker.addOnPositiveButtonClickListener {
             val newAlarm = AlarmItem(
-                id = System.currentTimeMillis().toInt(),
+                id = 0, // Database sẽ tự tăng ID
                 hour = picker.hour,
                 minute = picker.minute,
                 daysOfWeek = BooleanArray(7) { true },
                 soundUriString = null,
                 isEnabled = true
             )
-            alarms.add(newAlarm)
+            
+            // Lưu vào DB và lấy ID thực tế
+            val newId = dbHelper.addAlarm(currentUsername, newAlarm)
+            val alarmWithId = newAlarm.copy(id = newId.toInt())
+            
+            alarms.add(alarmWithId)
             alarmAdapter.notifyDataSetChanged()
-            saveAlarms()
-            scheduleAlarm(newAlarm)
+            scheduleAlarm(alarmWithId)
         }
 
         picker.show(childFragmentManager, "MATERIAL_TIME_PICKER")
@@ -180,8 +111,8 @@ class AlarmFragment : Fragment(R.layout.fragment_alarm), EditAlarmFragment.OnAla
         val index = alarms.indexOfFirst { it.id == alarm.id }
         if (index != -1) {
             alarms[index] = alarm
+            dbHelper.updateAlarm(alarm) // Cập nhật vào DB
             alarmAdapter.notifyDataSetChanged()
-            saveAlarms()
             if (alarm.isEnabled) {
                 scheduleAlarm(alarm)
             } else {
@@ -229,18 +160,8 @@ class AlarmFragment : Fragment(R.layout.fragment_alarm), EditAlarmFragment.OnAla
         alarmManager.cancel(pendingIntent)
     }
 
-    private fun saveAlarms() {
-        val json = gson.toJson(alarms)
-        sharedPreferences.edit().putString("alarm_list", json).apply()
-    }
-
     private fun loadAlarms() {
-        val json = sharedPreferences.getString("alarm_list", null)
-        if (json != null) {
-            val type = object : TypeToken<MutableList<AlarmItem>>() {}.type
-            val loadedAlarms: MutableList<AlarmItem> = gson.fromJson(json, type)
-            alarms.clear()
-            alarms.addAll(loadedAlarms)
-        }
+        alarms.clear()
+        alarms.addAll(dbHelper.getAlarmsByUser(currentUsername))
     }
 }

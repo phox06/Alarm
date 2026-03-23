@@ -4,16 +4,16 @@ import android.app.Activity
 import android.content.Intent
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.timepicker.MaterialTimePicker
@@ -25,7 +25,7 @@ class EditAlarmFragment : Fragment() {
     private lateinit var alarmItem: AlarmItem
     private lateinit var tvEditTime: TextView
     private lateinit var tvEditSoundValue: TextView
-    private lateinit var layoutDays: LinearLayout
+    private lateinit var tvRepeatValue: TextView
     
     private var selectedHour: Int = 0
     private var selectedMinute: Int = 0
@@ -53,8 +53,12 @@ class EditAlarmFragment : Fragment() {
     private val soundPickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                val uri: Uri? =
+                val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    result.data?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
                     result.data?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+                }
                 if (uri != null) {
                     selectedSoundUri = uri
                     updateSoundText(uri)
@@ -71,7 +75,8 @@ class EditAlarmFragment : Fragment() {
         val toolbar = view.findViewById<Toolbar>(R.id.toolbarEditAlarm)
         tvEditTime = view.findViewById(R.id.tvEditTime)
         tvEditSoundValue = view.findViewById(R.id.tvEditSoundValue)
-        layoutDays = view.findViewById(R.id.layoutDays)
+        tvRepeatValue = view.findViewById(R.id.tvRepeatValue)
+        val layoutRepeat = view.findViewById<RelativeLayout>(R.id.layoutRepeat)
         val layoutEditSound = view.findViewById<RelativeLayout>(R.id.layoutEditSound)
         val btnSave = view.findViewById<MaterialButton>(R.id.btnSaveEdit)
         val btnCancel = view.findViewById<MaterialButton>(R.id.btnCancelEdit)
@@ -81,10 +86,11 @@ class EditAlarmFragment : Fragment() {
 
         updateTimeText()
         updateSoundText(selectedSoundUri)
-        setupDayButtons()
+        updateRepeatText()
 
         tvEditTime.setOnClickListener { showTimePicker() }
         layoutEditSound.setOnClickListener { pickSound() }
+        layoutRepeat.setOnClickListener { showRepeatDialog() }
 
         btnSave.setOnClickListener {
             val editedAlarm = alarmItem.copy(
@@ -110,8 +116,47 @@ class EditAlarmFragment : Fragment() {
             tvEditSoundValue.text = "Mặc định"
             return
         }
-        val ringtone = RingtoneManager.getRingtone(requireContext(), uri)
-        tvEditSoundValue.text = ringtone.getTitle(requireContext())
+        try {
+            val ringtone = RingtoneManager.getRingtone(requireContext(), uri)
+            tvEditSoundValue.text = ringtone?.getTitle(requireContext()) ?: "Mặc định"
+        } catch (e: Exception) {
+            tvEditSoundValue.text = "Mặc định"
+        }
+    }
+
+    private fun updateRepeatText() {
+        val days = arrayOf("CN", "T2", "T3", "T4", "T5", "T6", "T7")
+        val selected = mutableListOf<String>()
+        for (i in selectedDays.indices) {
+            if (selectedDays[i]) {
+                selected.add(days[i])
+            }
+        }
+
+        tvRepeatValue.text = when {
+            selected.isEmpty() -> "Không bao giờ"
+            selected.size == 7 -> "Hàng ngày"
+            selected.size == 5 && !selectedDays[0] && !selectedDays[6] -> "Ngày thường"
+            selected.size == 2 && selectedDays[0] && selectedDays[6] -> "Cuối tuần"
+            else -> selected.joinToString(", ")
+        }
+    }
+
+    private fun showRepeatDialog() {
+        val days = arrayOf("Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy")
+        val checkedItems = selectedDays.copyOf()
+
+        AlertDialog.Builder(requireContext(), android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Lặp lại")
+            .setMultiChoiceItems(days, checkedItems) { _, which, isChecked ->
+                checkedItems[which] = isChecked
+            }
+            .setPositiveButton("Xong") { _, _ ->
+                checkedItems.copyInto(selectedDays)
+                updateRepeatText()
+            }
+            .setNegativeButton("Hủy", null)
+            .show()
     }
 
     private fun showTimePicker() {
@@ -140,31 +185,4 @@ class EditAlarmFragment : Fragment() {
         }
         soundPickerLauncher.launch(intent)
     }
-
-    private fun setupDayButtons() {
-        val days = arrayOf("S", "M", "T", "W", "T", "F", "S")
-        layoutDays.removeAllViews()
-        for (i in 0..6) {
-            val tv = TextView(requireContext()).apply {
-                text = days[i]
-                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-                gravity = android.view.Gravity.CENTER
-                setPadding(0, 16, 0, 16)
-                textSize = 16.sp
-                val unselectedColor = ContextCompat.getColor(context, android.R.color.darker_gray)
-                val selectedColor = ContextCompat.getColor(context, R.color.white)
-                
-                setTextColor(if (selectedDays[i]) selectedColor else unselectedColor)
-                setBackgroundResource(if (selectedDays[i]) R.drawable.bg_day_selected else 0)
-                setOnClickListener {
-                    selectedDays[i] = !selectedDays[i]
-                    setTextColor(if (selectedDays[i]) selectedColor else unselectedColor)
-                    setBackgroundResource(if (selectedDays[i]) R.drawable.bg_day_selected else 0)
-                }
-            }
-            layoutDays.addView(tv)
-        }
-    }
-    
-    private val Int.sp: Float get() = this * resources.displayMetrics.scaledDensity
 }
