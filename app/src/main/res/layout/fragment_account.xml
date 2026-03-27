@@ -6,13 +6,22 @@
     android:padding="24dp"
     android:gravity="center_horizontal">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tài khoản"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp"
+        android:layout_gravity="start"/>
+
     <ImageView
         android:id="@+id/ivAvatar"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:src="@drawable/ic_launcher_foreground"
         android:background="@android:color/darker_gray"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="8dp"
         android:padding="8dp" />
 
     <TextView

@@ -23,6 +23,7 @@ class LoginActivity : AppCompatActivity() {
         val etPassword = findViewById<EditText>(R.id.etPassword)
         val btnLogin = findViewById<Button>(R.id.btnLogin)
         val tvRegister = findViewById<TextView>(R.id.tvRegister)
+        val btnSkip = findViewById<Button>(R.id.btnSkip)
 
         btnLogin.setOnClickListener {
             val username = etUsername.text.toString()
@@ -34,9 +35,7 @@ class LoginActivity : AppCompatActivity() {
                 sharedPreferences.edit().putString("current_user", username).apply()
 
                 Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finish()
+                navigateToMain()
             } else {
                 Toast.makeText(this, "Sai tên đăng nhập hoặc mật khẩu!", Toast.LENGTH_SHORT).show()
             }
@@ -46,5 +45,20 @@ class LoginActivity : AppCompatActivity() {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
+
+        btnSkip.setOnClickListener {
+            // Sử dụng một username đặc biệt cho khách
+            val sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+            sharedPreferences.edit().putString("current_user", "Guest").apply()
+            
+            Toast.makeText(this, "Sử dụng với quyền khách", Toast.LENGTH_SHORT).show()
+            navigateToMain()
+        }
+    }
+
+    private fun navigateToMain() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }

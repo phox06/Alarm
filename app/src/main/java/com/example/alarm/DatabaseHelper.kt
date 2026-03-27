@@ -10,13 +10,14 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     companion object {
         private const val DATABASE_NAME = "UserDatabase.db"
-        private const val DATABASE_VERSION = 3
+        private const val DATABASE_VERSION = 4
         
         // Bảng Users
         private const val TABLE_USERS = "users"
         private const val COLUMN_USER_ID = "id"
         private const val COLUMN_USERNAME = "username"
         private const val COLUMN_PASSWORD = "password"
+        private const val COLUMN_AVATAR = "avatar_uri"
 
         // Bảng Alarms
         private const val TABLE_ALARMS = "alarms"
@@ -39,7 +40,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val createUsersTable = ("CREATE TABLE " + TABLE_USERS + " ("
                 + COLUMN_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + COLUMN_USERNAME + " TEXT UNIQUE, "
-                + COLUMN_PASSWORD + " TEXT)")
+                + COLUMN_PASSWORD + " TEXT, "
+                + COLUMN_AVATAR + " TEXT)")
         
         val createAlarmsTable = ("CREATE TABLE " + TABLE_ALARMS + " ("
                 + COLUMN_ALARM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -67,14 +69,18 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             db?.execSQL("DROP TABLE IF EXISTS " + TABLE_ALARMS)
             db?.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS)
             onCreate(db)
-        }
-        if (oldVersion < 3) {
-            val createWorldClockTable = ("CREATE TABLE " + TABLE_WORLD_CLOCK + " ("
-                    + COLUMN_WC_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    + COLUMN_WC_OWNER + " TEXT, "
-                    + COLUMN_TIMEZONE_ID + " TEXT, "
-                    + "FOREIGN KEY(" + COLUMN_WC_OWNER + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_USERNAME + "))")
-            db?.execSQL(createWorldClockTable)
+        } else {
+            if (oldVersion < 3) {
+                val createWorldClockTable = ("CREATE TABLE " + TABLE_WORLD_CLOCK + " ("
+                        + COLUMN_WC_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                        + COLUMN_WC_OWNER + " TEXT, "
+                        + COLUMN_TIMEZONE_ID + " TEXT, "
+                        + "FOREIGN KEY(" + COLUMN_WC_OWNER + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_USERNAME + "))")
+                db?.execSQL(createWorldClockTable)
+            }
+            if (oldVersion < 4) {
+                db?.execSQL("ALTER TABLE $TABLE_USERS ADD COLUMN $COLUMN_AVATAR TEXT")
+            }
         }
     }
 
@@ -87,6 +93,25 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val result = db.insert(TABLE_USERS, null, contentValues)
         db.close()
         return result
+    }
+
+    fun updateAvatar(username: String, uri: String) {
+        val db = this.writableDatabase
+        val values = ContentValues()
+        values.put(COLUMN_AVATAR, uri)
+        db.update(TABLE_USERS, values, "$COLUMN_USERNAME = ?", arrayOf(username))
+        db.close()
+    }
+
+    fun getAvatar(username: String): String? {
+        val db = this.readableDatabase
+        val cursor = db.query(TABLE_USERS, arrayOf(COLUMN_AVATAR), "$COLUMN_USERNAME = ?", arrayOf(username), null, null, null)
+        var uri: String? = null
+        if (cursor.moveToFirst()) {
+            uri = cursor.getString(0)
+        }
+        cursor.close()
+        return uri
     }
 
     fun checkUser(username: String): Boolean {

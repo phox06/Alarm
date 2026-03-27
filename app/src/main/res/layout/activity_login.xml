@@ -46,4 +46,12 @@
         android:clickable="true"
         android:focusable="true"/>
 
+    <Button
+        android:id="@+id/btnSkip"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Bỏ qua (Sử dụng không tài khoản)"/>
+
 </LinearLayout>

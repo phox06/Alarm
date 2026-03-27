@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity() {
                 1 -> tab.text = "Giờ thế giới"
                 2 -> tab.text = "Bấm giờ"
                 3 -> tab.text = "Hẹn giờ"
+                4 -> tab.text = "Tài khoản"
             }
         }.attach()
 
