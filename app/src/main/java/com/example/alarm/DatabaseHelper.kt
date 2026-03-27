@@ -114,6 +114,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return uri
     }
 
+    fun updatePassword(username: String, newPassword: String): Int {
+        val db = this.writableDatabase
+        val values = ContentValues()
+        values.put(COLUMN_PASSWORD, newPassword)
+        val result = db.update(TABLE_USERS, values, "$COLUMN_USERNAME = ?", arrayOf(username))
+        db.close()
+        return result
+    }
+
     fun checkUser(username: String): Boolean {
         val db = this.readableDatabase
         val query = "SELECT * FROM $TABLE_USERS WHERE $COLUMN_USERNAME = ?"

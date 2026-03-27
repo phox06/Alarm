@@ -15,8 +15,15 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
+        
+        // 1. Tự động đăng nhập
+        val sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        if (sharedPreferences.contains("current_user")) {
+            navigateToMain()
+            return
+        }
 
+        setContentView(R.layout.activity_login)
         dbHelper = DatabaseHelper(this)
 
         val etUsername = findViewById<EditText>(R.id.etUsername)
@@ -30,10 +37,7 @@ class LoginActivity : AppCompatActivity() {
             val password = etPassword.text.toString()
 
             if (dbHelper.checkUserLogin(username, password)) {
-                // Lưu user hiện tại vào SharedPreferences
-                val sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
                 sharedPreferences.edit().putString("current_user", username).apply()
-
                 Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show()
                 navigateToMain()
             } else {
@@ -47,10 +51,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         btnSkip.setOnClickListener {
-            // Sử dụng một username đặc biệt cho khách
-            val sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
             sharedPreferences.edit().putString("current_user", "Guest").apply()
-            
             Toast.makeText(this, "Sử dụng với quyền khách", Toast.LENGTH_SHORT).show()
             navigateToMain()
         }
