@@ -52,6 +52,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Bỏ qua (Sử dụng không tài khoản)"/>
+        android:text="Bỏ qua (Sử dụng không tài khoản)" />
 
 </LinearLayout>
