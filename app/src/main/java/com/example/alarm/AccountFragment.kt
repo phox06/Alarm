@@ -111,27 +111,30 @@ class AccountFragment : Fragment() {
         val etOld = dialogView.findViewById<EditText>(R.id.etOldPassword)
         val etNew = dialogView.findViewById<EditText>(R.id.etNewPassword)
         val etConfirm = dialogView.findViewById<EditText>(R.id.etConfirmNewPassword)
+        val btnConfirm = dialogView.findViewById<Button>(R.id.btnConfirmPassword)
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
-            .setPositiveButton("Cập nhật") { dialog, _ ->
-                val oldPass = etOld.text.toString()
-                val newPass = etNew.text.toString()
-                val confirmPass = etConfirm.text.toString()
+            .create()
 
-                if (dbHelper.checkUserLogin(currentUsername, oldPass)) {
-                    if (newPass == confirmPass && newPass.isNotEmpty()) {
-                        dbHelper.updatePassword(currentUsername, newPass)
-                        Toast.makeText(requireContext(), "Đổi mật khẩu thành công!", Toast.LENGTH_SHORT).show()
-                        dialog.dismiss()
-                    } else {
-                        Toast.makeText(requireContext(), "Mật khẩu mới không khớp!", Toast.LENGTH_SHORT).show()
-                    }
+        btnConfirm.setOnClickListener {
+            val oldPass = etOld.text.toString()
+            val newPass = etNew.text.toString()
+            val confirmPass = etConfirm.text.toString()
+
+            if (dbHelper.checkUserLogin(currentUsername, oldPass)) {
+                if (newPass == confirmPass && newPass.isNotEmpty()) {
+                    dbHelper.updatePassword(currentUsername, newPass)
+                    Toast.makeText(requireContext(), "Đổi mật khẩu thành công!", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
                 } else {
-                    Toast.makeText(requireContext(), "Mật khẩu cũ không chính xác!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Mật khẩu mới không khớp!", Toast.LENGTH_SHORT).show()
                 }
+            } else {
+                Toast.makeText(requireContext(), "Mật khẩu cũ không chính xác!", Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("Hủy", null)
-            .show()
+        }
+
+        dialog.show()
     }
 }
