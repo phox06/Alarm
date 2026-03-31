@@ -62,6 +62,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db?.execSQL(createUsersTable)
         db?.execSQL(createAlarmsTable)
         db?.execSQL(createWorldClockTable)
+
+        // Thêm tài khoản test mặc định
+        val values = ContentValues()
+        values.put(COLUMN_USERNAME, "admin")
+        values.put(COLUMN_PASSWORD, "123")
+        db?.insert(TABLE_USERS, null, values)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
