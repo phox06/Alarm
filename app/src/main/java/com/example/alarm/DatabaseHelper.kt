@@ -10,7 +10,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     companion object {
         private const val DATABASE_NAME = "UserDatabase.db"
-        private const val DATABASE_VERSION = 4
+        private const val DATABASE_VERSION = 5
         
         // Bảng Users
         private const val TABLE_USERS = "users"
@@ -18,6 +18,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_USERNAME = "username"
         private const val COLUMN_PASSWORD = "password"
         private const val COLUMN_AVATAR = "avatar_uri"
+        private const val COLUMN_EMAIL = "email"
 
         // Bảng Alarms
         private const val TABLE_ALARMS = "alarms"
@@ -41,6 +42,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 + COLUMN_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + COLUMN_USERNAME + " TEXT UNIQUE, "
                 + COLUMN_PASSWORD + " TEXT, "
+                + COLUMN_EMAIL + " TEXT, "
                 + COLUMN_AVATAR + " TEXT)")
         
         val createAlarmsTable = ("CREATE TABLE " + TABLE_ALARMS + " ("
@@ -67,6 +69,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val values = ContentValues()
         values.put(COLUMN_USERNAME, "admin")
         values.put(COLUMN_PASSWORD, "123")
+        values.put(COLUMN_EMAIL, "admin@example.com")
         db?.insert(TABLE_USERS, null, values)
     }
 
@@ -87,15 +90,19 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             if (oldVersion < 4) {
                 db?.execSQL("ALTER TABLE $TABLE_USERS ADD COLUMN $COLUMN_AVATAR TEXT")
             }
+            if (oldVersion < 5) {
+                db?.execSQL("ALTER TABLE $TABLE_USERS ADD COLUMN $COLUMN_EMAIL TEXT")
+            }
         }
     }
 
     // --- USER METHODS ---
-    fun addUser(username: String, password: String): Long {
+    fun addUser(username: String, password: String, email: String = ""): Long {
         val db = this.writableDatabase
         val contentValues = ContentValues()
         contentValues.put(COLUMN_USERNAME, username)
         contentValues.put(COLUMN_PASSWORD, password)
+        contentValues.put(COLUMN_EMAIL, email)
         val result = db.insert(TABLE_USERS, null, contentValues)
         db.close()
         return result
@@ -136,6 +143,26 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val exists = cursor.count > 0
         cursor.close()
         return exists
+    }
+
+    fun checkUserByEmail(email: String): Boolean {
+        val db = this.readableDatabase
+        val query = "SELECT * FROM $TABLE_USERS WHERE $COLUMN_EMAIL = ?"
+        val cursor = db.rawQuery(query, arrayOf(email))
+        val exists = cursor.count > 0
+        cursor.close()
+        return exists
+    }
+
+    fun getUsernameByEmail(email: String): String? {
+        val db = this.readableDatabase
+        val cursor = db.query(TABLE_USERS, arrayOf(COLUMN_USERNAME), "$COLUMN_EMAIL = ?", arrayOf(email), null, null, null)
+        var username: String? = null
+        if (cursor.moveToFirst()) {
+            username = cursor.getString(0)
+        }
+        cursor.close()
+        return username
     }
 
     fun checkUserLogin(username: String, password: String): Boolean {

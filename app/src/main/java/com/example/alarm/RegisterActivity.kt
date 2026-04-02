@@ -18,17 +18,19 @@ class RegisterActivity : AppCompatActivity() {
         dbHelper = DatabaseHelper(this)
 
         val etUsername = findViewById<EditText>(R.id.etUsername)
+        val etEmail = findViewById<EditText>(R.id.etEmail)
         val etPassword = findViewById<EditText>(R.id.etPassword)
         val etConfirmPassword = findViewById<EditText>(R.id.etConfirmPassword)
         val btnRegister = findViewById<Button>(R.id.btnRegister)
         val tvLogin = findViewById<TextView>(R.id.tvLogin)
 
         btnRegister.setOnClickListener {
-            val username = etUsername.text.toString()
-            val password = etPassword.text.toString()
-            val confirmPassword = etConfirmPassword.text.toString()
+            val username = etUsername.text.toString().trim()
+            val email = etEmail.text.toString().trim()
+            val password = etPassword.text.toString().trim()
+            val confirmPassword = etConfirmPassword.text.toString().trim()
 
-            if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                 Toast.makeText(this, "Vui lòng điền đầy đủ thông tin!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -41,8 +43,10 @@ class RegisterActivity : AppCompatActivity() {
             // Kiểm tra xem user đã tồn tại chưa
             if (dbHelper.checkUser(username)) {
                 Toast.makeText(this, "Tên đăng nhập đã tồn tại!", Toast.LENGTH_SHORT).show()
+            } else if (dbHelper.checkUserByEmail(email)) {
+                Toast.makeText(this, "Email này đã được sử dụng!", Toast.LENGTH_SHORT).show()
             } else {
-                val result = dbHelper.addUser(username, password)
+                val result = dbHelper.addUser(username, password, email)
                 if (result != -1L) {
                     Toast.makeText(this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show()
                     finish() // Quay lại màn hình đăng nhập
