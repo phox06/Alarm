@@ -41,19 +41,27 @@ class StopwatchFragment : Fragment(R.layout.fragment_stopwatch) {
         tvTimer = view.findViewById(R.id.tvTimer)
         tvLaps = view.findViewById(R.id.tvLaps)
 
-        view.findViewById<Button>(R.id.btnStart).setOnClickListener {
+        // Khai báo nút Bắt đầu/Tạm dừng
+        val btnStartPause = view.findViewById<Button>(R.id.btnStart)
+        // Ẩn nút Stop cũ đi (hoặc bạn có thể xóa hẳn trong file XML)
+        view.findViewById<Button>(R.id.btnStop)?.visibility = View.GONE
+
+        // Gộp logic Bắt đầu và Tạm dừng vào chung 1 nút
+        btnStartPause.setOnClickListener {
             if (!isRunning) {
+                // ĐANG DỪNG -> CHUYỂN SANG CHẠY
                 startTime = SystemClock.uptimeMillis()
                 handler.postDelayed(runnable, 0)
                 isRunning = true
-            }
-        }
-
-        view.findViewById<Button>(R.id.btnStop).setOnClickListener {
-            if (isRunning) {
+                // Đổi chữ thành Tạm dừng
+                btnStartPause.text = "Tạm dừng"
+            } else {
+                // ĐANG CHẠY -> CHUYỂN SANG DỪNG
                 timeBuff += updateTime
                 handler.removeCallbacks(runnable)
                 isRunning = false
+                // Đổi chữ thành Tiếp tục (hoặc Bắt đầu tùy bạn muốn)
+                btnStartPause.text = "Tiếp tục"
             }
         }
 
@@ -63,6 +71,7 @@ class StopwatchFragment : Fragment(R.layout.fragment_stopwatch) {
             }
         }
 
+        // Cập nhật nút Reset để nó đặt lại cả chữ của nút Bắt đầu
         view.findViewById<Button>(R.id.btnReset).setOnClickListener {
             handler.removeCallbacks(runnable)
             isRunning = false
@@ -71,6 +80,8 @@ class StopwatchFragment : Fragment(R.layout.fragment_stopwatch) {
             updateTime = 0L
             tvTimer.text = "00:00:000"
             tvLaps.text = "Lap Times:\n"
+            // Trả lại chữ gốc khi reset
+            btnStartPause.text = "Bắt đầu"
         }
     }
 }

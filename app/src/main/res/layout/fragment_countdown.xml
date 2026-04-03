@@ -4,10 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/windowBackground"
+    android:background="?android:attr/colorBackground"
     tools:context=".CountdownFragment">
 
-    <!-- Setup UI Container -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layoutSetup"
         android:layout_width="match_parent"
