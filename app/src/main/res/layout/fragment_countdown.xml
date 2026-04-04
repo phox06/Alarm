@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
+    android:background="#e0ffff"
     tools:context=".CountdownFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Giờ"
-                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textColor="#ffb6c1"
                 android:textSize="14sp" />
 
             <TextView
@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Phút"
-                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textColor="#ffb6c1"
                 android:textSize="14sp" />
 
             <TextView
@@ -46,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Giây"
-                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textColor="#ffb6c1"
                 android:textSize="14sp" />
         </LinearLayout>
 
@@ -91,9 +91,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="20dp"
-                app:strokeWidth="0dp">
+                app:strokeColor="#dda0dd"
+                app:strokeWidth="1dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -101,7 +102,7 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
                     android:text="00:10:00"
-                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textColor="#dda0dd"
                     android:textSize="14sp" />
             </com.google.android.material.card.MaterialCardView>
 
@@ -110,9 +111,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="20dp"
-                app:strokeWidth="0dp">
+                app:strokeColor="#dda0dd"
+                app:strokeWidth="1dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -120,7 +122,7 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
                     android:text="00:15:00"
-                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textColor="#dda0dd"
                     android:textSize="14sp" />
             </com.google.android.material.card.MaterialCardView>
 
@@ -129,9 +131,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="20dp"
-                app:strokeWidth="0dp">
+                app:strokeColor="#dda0dd"
+                app:strokeWidth="1dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -139,7 +142,7 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
                     android:text="00:30:00"
-                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textColor="#dda0dd"
                     android:textSize="14sp" />
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
@@ -159,13 +162,13 @@
             android:id="@+id/progressCountdown"
             android:layout_width="300dp"
             android:layout_height="300dp"
-            app:indicatorColor="?attr/colorPrimary"
+            app:indicatorColor="#ffb6c1"
             app:indicatorSize="300dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:trackColor="?attr/colorSurfaceVariant"
+            app:trackColor="#FFFFFF"
             app:trackThickness="8dp" />
 
         <TextView
@@ -173,7 +176,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="00:00"
-            android:textColor="?attr/colorPrimary"
+            android:textColor="#ffb6c1"
             android:textSize="64sp"
             app:layout_constraintBottom_toBottomOf="@+id/progressCountdown"
             app:layout_constraintEnd_toEndOf="@+id/progressCountdown"
@@ -195,6 +198,8 @@
         android:layout_width="200dp"
         android:layout_height="64dp"
         android:text="Bắt đầu"
+        android:textColor="#FFFFFF"
+        app:backgroundTint="#dda0dd"
         app:cornerRadius="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -221,6 +226,8 @@
             android:layout_marginEnd="16dp"
             android:layout_weight="1"
             android:text="Xóa"
+            android:textColor="#dda0dd"
+            app:backgroundTint="#FFFFFF"
             app:cornerRadius="32dp" />
 
         <com.google.android.material.button.MaterialButton
@@ -229,6 +236,8 @@
             android:layout_height="64dp"
             android:layout_weight="1"
             android:text="Tạm dừng"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#dda0dd"
             app:cornerRadius="32dp" />
     </LinearLayout>
 

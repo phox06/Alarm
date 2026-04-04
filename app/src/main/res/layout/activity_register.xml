@@ -2,64 +2,72 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#2AFFEB3B"
+    android:gravity="center"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center">
+    android:padding="16dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
         android:text="Đăng Ký"
+        android:textColor="#82B1FF"
         android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp"/>
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/etUsername"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#990D0D"
         android:hint="Tên đăng nhập"
-        android:inputType="textPersonName"
-        android:layout_marginBottom="16dp"/>
+        android:inputType="textPersonName" />
 
     <EditText
         android:id="@+id/etEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#990D0D"
         android:hint="Email"
-        android:inputType="textEmailAddress"
-        android:layout_marginBottom="16dp"/>
+        android:inputType="textEmailAddress" />
 
     <EditText
         android:id="@+id/etPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#990D0D"
         android:hint="Mật khẩu"
-        android:inputType="textPassword"
-        android:layout_marginBottom="16dp"/>
+        android:inputType="textPassword" />
 
     <EditText
         android:id="@+id/etConfirmPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="#990D0D"
         android:hint="Xác nhận mật khẩu"
-        android:inputType="textPassword"
-        android:layout_marginBottom="24dp"/>
+        android:inputType="textPassword" />
 
     <Button
         android:id="@+id/btnRegister"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Đăng Ký"/>
+        android:backgroundTint="#47ED0B0B"
+        android:text="Đăng Ký"
+        android:textColor="#FFE57F" />
 
     <TextView
         android:id="@+id/tvLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Đã có tài khoản? Đăng nhập"
-        android:textColor="@color/purple_500"
         android:layout_marginTop="16dp"
         android:clickable="true"
-        android:focusable="true"/>
+        android:focusable="true"
+        android:text="Đã có tài khoản? Đăng nhập"
+        android:textColor="#82B1FF" />
 
 </LinearLayout>

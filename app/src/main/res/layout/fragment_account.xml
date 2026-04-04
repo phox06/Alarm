@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="24dp"
+    android:background="#e0ffff"
     android:gravity="center_horizontal">
 
     <TextView
@@ -12,6 +13,7 @@
         android:text="Tài khoản"
         android:textSize="24sp"
         android:textStyle="bold"
+        android:textColor="#ffb6c1"
         android:layout_marginBottom="24dp"
         android:layout_gravity="start"/>
 
@@ -20,7 +22,7 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:src="@drawable/ic_launcher_foreground"
-        android:background="@android:color/darker_gray"
+        android:background="#dda0dd"
         android:layout_marginTop="8dp"
         android:padding="8dp" />
 
@@ -29,6 +31,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Tên người dùng"
+        android:textColor="#ffb6c1"
         android:textSize="22sp"
         android:textStyle="bold"
         android:layout_marginTop="16dp" />
@@ -38,13 +41,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Số lượng báo thức: 0"
+        android:textColor="#dda0dd"
         android:textSize="16sp"
         android:layout_marginTop="8dp" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@android:color/darker_gray"
+        android:background="#dda0dd"
         android:layout_marginTop="32dp"
         android:layout_marginBottom="16dp" />
 
@@ -54,6 +58,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Đổi mật khẩu"
+        android:textColor="#dda0dd"
         android:visibility="visible"/>
 
     <Button
@@ -62,7 +67,7 @@
         android:layout_height="wrap_content"
         android:text="Đăng xuất"
         android:layout_marginTop="16dp"
-        android:backgroundTint="@android:color/holo_red_light"
-        android:textColor="@android:color/white" />
+        android:backgroundTint="#ffb6c1"
+        android:textColor="#FFFFFF" />
 
 </LinearLayout>

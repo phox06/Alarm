@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/windowBackground">
+    android:background="#e0ffff">
 
     <!-- Header / Title -->
     <TextView
@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="World Clock"
+        android:textColor="#ffb6c1"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -30,9 +31,10 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="260dp"
             android:layout_height="260dp"
+            app:cardBackgroundColor="#FFFFFF"
             app:cardCornerRadius="130dp"
-            app:cardElevation="0dp"
-            app:strokeColor="?attr/colorPrimary"
+            app:cardElevation="4dp"
+            app:strokeColor="#dda0dd"
             app:strokeWidth="2dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -53,7 +55,7 @@
                     android:format24Hour="HH:mm"
                     android:textSize="64sp"
                     android:textStyle="bold"
-                    android:textColor="?attr/colorOnSurface" />
+                    android:textColor="#ffb6c1" />
 
                 <TextView
                     android:id="@+id/tvCurrentTimeZone"
@@ -61,7 +63,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="GMT+07:00"
-                    android:textColor="?attr/colorPrimary"
+                    android:textColor="#dda0dd"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -69,7 +71,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Múi giờ hiện tại"
-                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textColor="#dda0dd"
                     android:textSize="12sp" />
 
             </LinearLayout>
@@ -84,7 +86,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:text="Thành phố khác"
-        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textColor="#ffb6c1"
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -108,8 +110,9 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="#dda0dd"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:tint="@android:color/white" />
+        app:tint="#ffb6c1" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

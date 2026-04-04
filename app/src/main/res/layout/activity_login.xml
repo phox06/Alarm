@@ -2,59 +2,65 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#2AFFEB3B"
+    android:gravity="center"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center">
+    android:padding="16dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
         android:text="Đăng Nhập"
+        android:textColor="#82B1FF"
         android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp"/>
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/etUsername"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#990D0D"
         android:hint="Tên đăng nhập"
-        android:inputType="textPersonName"
-        android:layout_marginBottom="16dp"/>
+        android:inputType="textPersonName" />
 
     <EditText
         android:id="@+id/etPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="#50990D0D"
         android:hint="Mật khẩu"
-        android:inputType="textPassword"
-        android:layout_marginBottom="24dp"/>
+        android:inputType="textPassword" />
 
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Đăng Nhập"/>
+        android:backgroundTint="#47ED0B0B"
+        android:text="Đăng Nhập"
+        android:textColor="#FFE57F" />
 
     <TextView
         android:id="@+id/tvForgotPassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Quên mật khẩu?"
-        android:textColor="@color/design_default_color_primary"
         android:clickable="true"
-        android:focusable="true"/>
+        android:focusable="true"
+        android:text="Quên mật khẩu?"
+        android:textColor="#82B1FF" />
 
     <TextView
         android:id="@+id/tvRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Chưa có tài khoản? Đăng ký ngay"
-        android:textColor="@color/design_default_color_primary"
         android:clickable="true"
-        android:focusable="true"/>
+        android:focusable="true"
+        android:text="Chưa có tài khoản? Đăng ký ngay"
+        android:textColor="#82B1FF" />
 
     <Button
         android:id="@+id/btnSkip"
@@ -62,6 +68,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Bỏ qua (Sử dụng không tài khoản)" />
+        android:text="Bỏ qua (Sử dụng không tài khoản)"
+        android:textColor="#FF8A80" />
 
 </LinearLayout>

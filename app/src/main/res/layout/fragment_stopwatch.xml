@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
+    android:background="#e0ffff"
     android:padding="16dp">
 
     <TextView
@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="64dp"
         android:text="00:00:00"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="#ffb6c1"
         android:textSize="64sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -36,6 +36,8 @@
             android:layout_height="64dp"
             android:layout_marginEnd="16dp"
             android:text="Reset"
+            android:textColor="#dda0dd"
+            app:backgroundTint="#FFFFFF"
             app:cornerRadius="32dp" />
 
         <com.google.android.material.button.MaterialButton
@@ -43,6 +45,8 @@
             android:layout_width="120dp"
             android:layout_height="64dp"
             android:text="Bắt đầu"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#dda0dd"
             app:cornerRadius="32dp" />
 
         <com.google.android.material.button.MaterialButton
@@ -50,7 +54,9 @@
             android:layout_width="120dp"
             android:layout_height="64dp"
             android:text="Dừng"
+            android:textColor="#FFFFFF"
             android:visibility="gone"
+            app:backgroundTint="#ffb6c1"
             app:cornerRadius="32dp" />
 
         <com.google.android.material.button.MaterialButton
@@ -60,6 +66,8 @@
             android:layout_height="64dp"
             android:layout_marginStart="16dp"
             android:text="Vòng"
+            android:textColor="#dda0dd"
+            app:backgroundTint="#FFFFFF"
             app:cornerRadius="32dp" />
     </LinearLayout>
 
@@ -76,7 +84,7 @@
             android:layout_height="wrap_content"
             android:padding="16dp"
             android:text="Lap Times:\n"
-            android:textColor="?attr/colorOnSurface"
+            android:textColor="#dda0dd"
             android:textSize="18sp" />
     </ScrollView>
 
